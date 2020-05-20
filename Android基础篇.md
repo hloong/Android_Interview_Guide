@@ -1,14 +1,13 @@
-#Activity的面试基础详解
+# Activity的面试基础详解
 
-###1，activity的四种状态
-
+### 1，activity的四种状态
 running、paused、stopped、killed
 
-###2，Android的进程优先级
+### 2，Android的进程优先级
 
 前台 / 可见 / 服务 / 后台 / 空
 
-###3，Android的任务栈，启动模式
+### 3，Android的任务栈，启动模式
 
 栈：先进后出
 
@@ -22,13 +21,13 @@ running、paused、stopped、killed
 *   singleInstance 单实例模式，加强版singleTask，该Activity只能单独位于一个任务栈且该栈只有它一个
 `使用场景：比如浏览器BrowserActivity很耗内存，很多app都会要调用它，这样就可以把该Activity设置成单例模式。比如：闹钟闹铃。`
 
-###4，Scheme跳转协议
+### 4，Scheme跳转协议
 
 通过自定义scheme协议，方便跳转app中的各个页面
 通过scheme协议，服务器可以定制化告诉App跳转到那个页面
 通过通知栏消息定制化跳转页面，通过H5页面跳转页面等。
 
-###5，生命周期
+### 5，生命周期
 
 启动： onCreate （用户不可见） -> onStart （用户可见但不在前台在后台，无法与用户交互） -> onResume (用户可见，在前台并获得焦点)
 点击Home回主界面（Activity不可见） -> onPause -> onStop
@@ -48,7 +47,7 @@ Activity A 启动另一个 Activity B，回调如下
 Activity A 的 onPause() → Activity B 的 onCreate() →onStart() → onResume() → Activity A 的 onStop()；
 如果 B 是透明主题又或则是个 DialogActivity，则不会回调 A 的onStop；
 
-###7，说下 onSaveInstanceState()方法的作用 ? 何时会被调用？
+### 7，说下 onSaveInstanceState()方法的作用 ? 何时会被调用？
 
 异常情况下（系统配置发生改变时导致 Activity被杀死并重新创建、资源内存不足导致低优先级的 Activity 被杀死）
 
@@ -56,7 +55,7 @@ Activity A 的 onPause() → Activity B 的 onCreate() →onStart() → onResume
 *   当 Activity 被重建后，系统会调用 onRestoreInstanceState，并且把 onSaveInstanceState方法所保存的 Bundle 对象同时传参给onRestoreInstanceState和 onCreate()，因此可以通过这两个方法判断Activity 是否被重建，调用在 onStart 之后；
 ![image.png](https://upload-images.jianshu.io/upload_images/46451-2d5266040fb6f3c4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-###8，了解哪些 Activity 常用的标记位 Flags？
+### 8，了解哪些 Activity 常用的标记位 Flags？
 
 *   FLAG_ACTIVITY_NEW_TASK : 对应 singleTask 启动模式，其效果和在 XML 中指定该启动模式相同；
 
@@ -68,7 +67,7 @@ Activity A 的 onPause() → Activity B 的 onCreate() →onStart() → onResume
 
 *   FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS : 具有这个标记的Activity 不会出现在历史 Activity 列表中；
 
-###9，说下 Activity 跟 window，view 之间的关系？
+### 9，说下 Activity 跟 window，view 之间的关系？
 
 Activity 创建时通过 attach()初始化了一个 Window 也就是PhoneWindow，一个 PhoneWindow 持有一个 DecorView 的实例，
 
@@ -85,7 +84,7 @@ Activity剪窗花的人（控制的）；Window窗户（承载的一个模型）
   3：“ViewRoot”通过addView方法来一个个的添加View。比如TextView，Button等
   4：这些View的事件监听，是由WindowManagerService来接受消息，并且回调Activity函数。比如onClickListener，onKeyDown等。
 
-###10，横竖屏切换的 Activity 生命周期变化？
+### 10，横竖屏切换的 Activity 生命周期变化？
 
 *   不设置 Activity 的 android:configChanges 时，切屏会销毁当前Activity，然后重新加载调用各个生命周期，切横屏时会执行一次，切竖屏时会执行两次； onPause()→onStop()→onDestory()→onCreate()→onStart()→onResume()
 
@@ -100,20 +99,20 @@ Activity剪窗花的人（控制的）；Window窗户（承载的一个模型）
 
 *   设置 Activity 的android:configChanges="orientation|keyboardHidden|screenSize"时，机型测试通过，切屏不会重新调用各个生命周期，只会执行 onConfigurationChanged 方法；
 
-###11，如何启动其他应用的 Activity？
+### 11，如何启动其他应用的 Activity？
 
 在保证有权限访问的情况下，通过隐式 Intent 进行目标Activity 的 IntentFilter 匹配，原则是：
 一个 intent 只有同时匹配某个 Activity 的 intentfilter 中的 action、category、data 才算完全匹配，才能启动该 Activity；
 一个 Activity 可以有多个 intent-filter，一个 intent只要成功匹配任意一组 intent-filter，就可以启动该Activity；
 
-###12，Activity 的启动过程？
+### 12，Activity 的启动过程？
 
 1.  点击 App 图标后通过 startActivity 远程调用到 AMS 中，AMS 中将新启动的 activity 以 activityrecord 的结构压入 activity栈中，并通过远程 binder 回调到原进程，使得原进程进入 pause状态，原进程 pause 后通知 AMS 我 pause 了
 2.  此时 AMS 再根据栈中 Activity 的启动 intent 中的 flag 是否含有 new_task 的标签判断是否需要启动新进程，启动新进程通过startProcessXXX 的函数
 3.  启动新进程后通过反射调用 ActivityThread 的 main 函数，main函数中调用 looper.prepar 和 lopper.loop 启动消息队列循环机制。最后远程告知 AMS 我启动了。AMS 回调handleLauncherAcitivyt 加载 activity。在handlerLauncherActivity 中会通过反射调用 Application 的onCreate 和 activity 的 onCreate 以及通过handleResumeActivity 中反射调用 Activity 的 onResume
 ![image.png](https://upload-images.jianshu.io/upload_images/46451-5ae96c9f277d0550.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-###13，Activity之间传值有哪几种方法？
+### 13，Activity之间传值有哪几种方法？
 
   1，通过Intent直接传参数
   2，通过Bundle封装数据传指
@@ -122,7 +121,7 @@ Activity剪窗花的人（控制的）；Window窗户（承载的一个模型）
   5，通过存储介质，比如数据库，sharedpreference，文件等
   6，通过事件总线EventBus形式
 
-###14，设备横竖屏切换的时候，接下来会发生什么？
+### 14，设备横竖屏切换的时候，接下来会发生什么？
 
 1、不设置Activity的android:configChanges时，切屏会重新调用各个生命周期，切横屏时会执行一次，切竖屏时会执行两次
 
@@ -130,18 +129,18 @@ Activity剪窗花的人（控制的）；Window窗户（承载的一个模型）
 
 3、设置Activity的android:configChanges=”orientation|keyboardHidden”时，切屏不会重新调用各个生命周期，只会执行onConfigurationChanged方法
 
-#Fragment的面试详解
+# Fragment的面试详解
 
-###1，Fragment为什么被称为第五大组件
+### 1，Fragment为什么被称为第五大组件
 Fragment一开始是用于平板的扩展页面，后面全部应用于Activity内部切换
 Fragment有生命周期，切依附于Activity
 
-###2，Fragment的加载到Activity的2种方式
+### 2，Fragment的加载到Activity的2种方式
 
 *   添加Fragment到Activity的布局文件xml中
 *   动态在Activity中添加Fragment
 
-###3，FragmentPagerAdapter与FragmentStatePagerAdapter的区别？
+### 3，FragmentPagerAdapter与FragmentStatePagerAdapter的区别？
 
 二者都继承 PagerAdapter
 
@@ -150,7 +149,7 @@ Fragment有生命周期，切依附于Activity
 
 viewpager中，fragment嵌套fragment的时候必须使用FragmentStatePageAdapter才起作用
 
-###4，Fragment的生命周期
+### 4，Fragment的生命周期
 
 Fragment生命周期比Activity多5个方法，Fragment里没有onRestart
 onAttach，onDetach，onCreateView，onDestoryView
@@ -158,39 +157,39 @@ onViewCreated和onActivityCreated
 
 ![image.png](https://upload-images.jianshu.io/upload_images/46451-4e1e6ef35a406a32.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-###5，Fragment的通信
+### 5，Fragment的通信
 
 *   在frgment中调用Activity中的方法，getActivity
 *   在Activity中调用Fragment中的方法，接口回调
 *   在Fragment中调用Fragment中的方法，findFragmentById
 
-###6，getFragmentManager、getSupportFragmentManager 、getChildFragmentManager 之间的区别？
+### 6，getFragmentManager、getSupportFragmentManager 、getChildFragmentManager 之间的区别？
 
 *   getFragmentManager()所得到的是所在 fragment 的父容器的管理器， getChildFragmentManager()所得到的是在fragment 里面子容器的管理器， 如果是 fragment 嵌套fragment，那么就需要利用getChildFragmentManager()；
 *   因为 Fragment 是 3.0 Android 系统 API 版本才出现的组件，所以 3.0 以上系统可以直接调用getFragmentManager()来获取 FragmentManager()对象，而 3.0 以下则需要调用 getSupportFragmentManager() 来间接获取；
 
-###7，Fragment中的add与replace的区别（Fragment重叠）
+### 7，Fragment中的add与replace的区别（Fragment重叠）
 
 *   add 不会重新初始化fragment，replace每次都会。所以如果在fragment生命周期内获取数据，使用replace会重复获取。
 *   添加相同的 fragment 时，replace 不会有任何变化，add会报 IllegalStateException 异常
 *   replace 先 remove 掉相同 id 的所有 fragment，然后在add 当前的这个 fragment，而 add 是覆盖前一个fragment。所以如果使用 add 一般会伴随 hide()和show()，避免布局重叠；
 *   使用 add，如果应用放在后台，或以其他方式被系统销毁，再打开时，hide()中引用的 fragment 会销毁，所以依然会出现布局重叠 bug，可以使用 replace 或使用 add时，添加一个 tag 参数；
 
-#Service面试详解
+# Service面试详解
 
 参考：[https://blog.csdn.net/javazejian/article/details/52709857](https://blog.csdn.net/javazejian/article/details/52709857)
 
-###1，Service是什么？
+### 1，Service是什么？
 
 Service是一个一种可以在后台执行长时间运行操作而没有用户界面的应用组件，无法做耗时的操作
 
-###2，Service和Thread的区别
+### 2，Service和Thread的区别
 
 service运行在主线程中，无法做耗时的操作
 
 thread是线程的最小单元，一般指耗时线程
 
-###3，Service启动方式
+### 3，Service启动方式
 
 *   startService
 
@@ -220,18 +219,18 @@ Service是运行在主线程当中的，所以在service里面编写耗时的操
 
 总结：使用IntentService的好处有哪些。首先，省去了手动开线程的麻烦；第二，不用手动停止service；第三，由于设计了工作队列，可以启动多次---startService(),但是只有一个service实例和一个工作线程。一个一个熟悉怒执行。
 
-###5，Service的生命周期
+### 5，Service的生命周期
 
 ![image.png](https://upload-images.jianshu.io/upload_images/46451-8e3b9782ba62fc8c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-#BroadcastReceiver面试详解
+# BroadcastReceiver面试详解
 
-###1，广播定义（类似观察者模式）
+### 1，广播定义（类似观察者模式）
 
 BroadcastReceiver是一种全局监听器，用来实现系统中不同组件之间的通信。有时候也会用来作为传输少量而且发送频率低的数据，但是如果数据的发送频率比较高或者数量比较大就不建议用广播接收者来接收了，因为这样的效率很不好，因为BroadcastReceiver接收数据的开销还是比较大的。
 
-###2，使用场景
+### 2，使用场景
 
 *   同一个app具有多个进程的不同组件之间的消息通讯
 *   不同app之间的组件之间消息通讯
@@ -242,19 +241,19 @@ eg：
 
 2）组件局部监听：这种主要是在Activity或者Service中使用registerReceiver()动态注册的广播接收器，因为当我们收到一些特定的消息，比如网络连接发生变化时，我们可能需要在当前Activity页面给用户一些UI上的提示，或者将Service中的网络请求任务暂停。所以这种动态注册的广播接收器适合特定组件的特定消息处理。
 
-###3，广播的种类
+### 3，广播的种类
 
 *   Normal Broadcast ：Context.sendBroadcast 普通的广播，完全异步，可以在同一时刻被所有接收者接收到，消息传递效率高且无法中断广播的传播
 *   System Broadcast : Context.sendOrderedBroadcast 有序广播； 发送有序广播后，广播接收者将按预先声明的优先级依次接收Broadcast。优先级高的优先接收到广播，而在其onReceiver()执行过程中，广播不会传播到下一个接收者，此时当前的广播接收者可以abortBroadcast()来终止广播继续向下传播，也可以将intent中的数据进行修改设置，然后将其传播到下一个广播接收者。 sendOrderedBroadcast(intent, null);//发送有序广播
 *   粘性广播：sendStickyBroadcast()来发送该类型的广播信息，这种的广播的最大特点是，当粘性广播发送后，最后的一个粘性广播会滞留在操作系统中。如果在粘性广播发送后的一段时间里，如果有新的符合广播的动态注册的广播接收者注册，将会收到这个广播消息，虽然这个广播是在广播接收者注册之前发送的，另外一点，对于静态注册的广播接收者来说，这个等同于普通广播。
 *   Local Broadcast : 只在自身App内传播 本地广播
 
-###4，实现广播Receiver
+### 4，实现广播Receiver
 
 静态注册：注册完成就一直运行，Menifest文件中
 动态注册：跟随Activity的生命周期，必须要在onDestory中销毁，否则内存泄露，因为可以一直接收到
 
-###5，内部实现机制
+### 5，内部实现机制
 
 自定义广播接受者，并复写onRecvice方法
 通过Binder机制向AMS（Activity Manager Service）进行注册
@@ -262,7 +261,7 @@ eg：
 AMS查找符合相应条件（IntentFilter/Permission等）的BroadcastReceiver，将广播相应的消息循环队列中
 消息循环拿到广播后，回调onReceive方法
 
-###6，本地广播LocalBroadcastManager详解
+### 6，本地广播LocalBroadcastManager详解
 
 关于优势：
 
@@ -280,9 +279,9 @@ AMS查找符合相应条件（IntentFilter/Permission等）的BroadcastReceiver�
 
 本地广播是不能用静态注册的；静态注册的目的--程序停止后也能监听
 
-#Android中的动画
+# Android中的动画
 
-###1，几种动画？
+### 1，几种动画？
 
 帧动画：指通过指定每一帧的图片和播放时间，有序的进行播放而形成动画效果，比如想听的律动条。
 
@@ -290,7 +289,7 @@ AMS查找符合相应条件（IntentFilter/Permission等）的BroadcastReceiver�
 
 属性动画：在Android3.0的时候才支持，通过不断的改变View的属性，不断的重绘而形成动画效果。相比于视图动画，View的属性是真正改变了。比如view的旋转，放大，缩小。
 
-###2，Android 动画框架实现原理
+### 2，Android 动画框架实现原理
 
 传统的动画框架：View.startAnimation();
 
@@ -300,7 +299,7 @@ AMS查找符合相应条件（IntentFilter/Permission等）的BroadcastReceiver�
 
 调用的canvas.translate(xxx),canvas.scaleX(xxx)…. Xxx:matrix像素矩阵来控制动画的数据。记得看源码，结合多只缩放的demo看源码。
 
-###3，属性动画实现原理
+### 3，属性动画实现原理
 
 工作原理：在一定时间间隔内，通过不断对值进行改变，并不断将该值赋给对象的属性，从而实现该对象在该属性上的动画效果。
 
@@ -398,9 +397,9 @@ dispatchDraw() {
 
 View在做动画是，根据动画时间的插值，计算出一个Matrix，不停的invalidate，在onDraw中的Canvas上使用这个计算出来的Matrix去draw view的内容。某个view的动画绘制并不是由它自己完成，而是由它的父view完成，使它的父view画布进行了移动，而点击时还是点击原来的画布。使得它看起来变化了。
 
-#数据库面试相关
+# 数据库面试相关
 
-###1，数据库的操作类有那些，如何导入外部数据库？
+### 1，数据库的操作类有那些，如何导入外部数据库？
 
 读懂题目。如果碰到问题比较模糊的时候可以适当问问面试官。
 
@@ -428,9 +427,9 @@ View在做动画是，根据动画时间的插值，计算出一个Matrix，不�
 
 我上一个项目就是这么做的，由于app上架之前就有一些初始数据需要内置，也会碰到数据的升级等问题，我是这么做的…… 同时我碰到最有意思的问题就是关于数据库并发操作的问题，比如：多线程操作数据库的时候，我采取的是封装使用互斥锁来解决……
 
-#Webview面试详解
+# Webview面试详解
 
-###1，常见的坑
+### 1，常见的坑
 
 *   android api 16以及以前的版本存在远程代码执行安全漏洞，主要是因为程序没有正确的限制使用Webview.addJavascriptInterface方法，
 
@@ -442,20 +441,20 @@ View在做动画是，根据动画时间的插值，计算出一个Matrix，不�
 *   后台耗电（需要在onDestory里把webview 销毁掉）
 *   Webview硬件加速导致页面渲染问题；只能通过暂时关闭加速
 
-###2，内存泄露问题
+### 2，内存泄露问题
 
 *   独立进程，涉及到了进程间的通讯（推荐）
 *   动态添加webview，对传入的webview中使用的Context使用弱引用，动态添加webview意思在布局创建个ViewGroup用来放置Webview，Activity创建时add进来，在Activity停止时remove掉
 
-#Binder面试详解
+# Binder面试详解
 
-###1，Binder机制的简单理解
+### 1，Binder机制的简单理解
 
 在Android系统的Binder机制中，是有Client,Service,ServiceManager,Binder驱动程序组成的，其中Client，service，Service Manager运行在用户空间，Binder驱动程序是运行在内核空间的。而Binder就是把这4种组件粘合在一块的粘合剂，其中核心的组件就是Binder驱动程序，Service Manager提供辅助管理的功能，而Client和Service正是在Binder驱动程序和Service Manager提供的基础设施上实现C/S 之间的通信。其中Binder驱动程序提供设备文件/dev/binder与用户控件进行交互，
 
   Client、Service，Service Manager通过open和ioctl文件操作相应的方法与Binder驱动程序进行通信。而Client和Service之间的进程间通信是通过Binder驱动程序间接实现的。而Binder Manager是一个守护进程，用来管理Service，并向Client提供查询Service接口的能力。
 
-###2，为什么使用Binder（已有的跨进程都不适合Android）
+### 2，为什么使用Binder（已有的跨进程都不适合Android）
 
 *   Android使用的Linux内核拥有非常多的跨进程通讯机制（管道，消息队列，信号，信号量，共享内存，socket ）
 
@@ -464,7 +463,7 @@ View在做动画是，根据动画时间的插值，计算出一个Matrix，不�
 *   性能 （相对Socket更高效）
 *   安全（跟socket的只一个url就链接的不安全相比，binder支持双方做调用时身份校验）
 
-###3，binder通信模型
+### 3，binder通信模型
 
 通讯录，serviceManager，binder驱动（类似电话基站）
 
@@ -478,7 +477,7 @@ View在做动画是，根据动画时间的插值，计算出一个Matrix，不�
 ![image.png](https://upload-images.jianshu.io/upload_images/46451-96d5ed394758cfd5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-###4，到底什么是Binder？
+### 4，到底什么是Binder？
 
 通常意义下，Binder指的是一种通信机制
 
@@ -490,7 +489,7 @@ View在做动画是，根据动画时间的插值，计算出一个Matrix，不�
 
 Android中实现IBinder这个接口就可以垮进程使用
 
-###5，AIDL解决了什么问题？
+### 5，AIDL解决了什么问题？
 
 AIDL的全称：Android Interface Definition Language，安卓接口定义语言。
 
@@ -504,23 +503,23 @@ AIDL:可以理解为双方的一个协议合同。双方都要持有这份协议
 
 在系统源码里面有大量用到aidl，比如系统服务。电视机顶盒系统开发。你的服务要暴露给别的开发者来使用。
 
-###6，Android开发中何时使用多进程？使用多进程的好处是什么？
+### 6，Android开发中何时使用多进程？使用多进程的好处是什么？
 
 即时通讯或者社交应用，webview可以单独给进程
 
 在启动一个不可见的轻量级私有进程，在后台收发消息，或者做一些耗时的事情，或者开机启动这个进程，然后做监听等。还有就是防止主进程被杀守护进程，守护进程和主进程之间相互监视，有一方被杀就重新启动它。
 
-###7，Android中进程间通信有那些实现方式？
+### 7，Android中进程间通信有那些实现方式？
 
 Intent，Binder（AIDL），Messenger，BroadcastReceiver
 
-###8，binder的内存拷贝过程
+### 8，binder的内存拷贝过程
 
 相比其他的IPC通信，比如消息机制、共享内存、管道、信号量等，Binder仅需一次内存拷贝，即可让目标进程读取到更新数据，同共享内存一样相当高效，其他的IPC通信机制大多需要2次内存拷贝。Binder内存拷贝的原理为：进程A为Binder客户端，在IPC调用前，需将其用户空间的数据拷贝到Binder驱动的内核空间，由于进程B在打开Binder设备(/dev/binder)时，已将Binder驱动的内核空间映射(mmap)到自己的进程空间，所以进程B可以直接看到Binder驱动内核空间的内容改动
 
-#Handler和AsyncTask面试详解
+# Handler和AsyncTask面试详解
 
-###1，什么是Handler？
+### 1，什么是Handler？
 
 Handler是线程的消息通讯的桥梁，主要用来发送消息及处理消息。
 
@@ -532,12 +531,12 @@ handler通过发送和处理Message和Runnable对象来关联相对应线程的M
 ![image.png](https://upload-images.jianshu.io/upload_images/46451-f5624e34fd7091b5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-###2，Handler的使用方法
+### 2，Handler的使用方法
 
 *   post（Runnable）其实底层调用的还是sendMessage，主要是系统自己封装了
 *   sendMessage（message）
 
-###3，Handler机制原理
+### 3，Handler机制原理
 
 ![image.png](https://upload-images.jianshu.io/upload_images/46451-31dc7316298784c2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -550,19 +549,19 @@ handler整个流程中，主要有四个对象，handler，Message,MessageQueue,
 
 不断的从MessageQueue中取出Message交给handler进行处理。从而实现线程之间的通信。
 
-###4，解决Handler的内存泄露
+### 4，解决Handler的内存泄露
 
 原因：静态内部类持有外部类的匿名引用，导致外部activity无法释放
 
 解决：handler内部持有外部activity的弱引用，并把handler改为静态内部类，mHandler.removeCallback
 
-###5，什么是AsyncTask
+### 5，什么是AsyncTask
 
 本质上就是一个封装了线程池和handler的异步框架，无法做耗时操作
 
 怎么使用：三个参数（），5个方法（onPreExecute前期操作，doInBackground，onPostExecute）
 
-###6，AsyncTask的机制原理
+### 6，AsyncTask的机制原理
 
 它本质上是一个静态的线程池，它派生出来的子类可以实现不同的异步任务，这些任务都是提交到静态的线程池中执行。
 
@@ -570,13 +569,13 @@ handler整个流程中，主要有四个对象，handler，Message,MessageQueue,
 
 当任务状态改变之后，工作线程会向UI线程发送消息，AsyncTask内部的InternalHandler想要这些消息，并调用相关的回调函数
 
-###7，AsyncTask的注意事项
+### 7，AsyncTask的注意事项
 
 内存泄露：跟handler一样
 
 生命周期：不调用cancel，无法销毁，可能导致崩溃
 
-###8，HandlerThread面试详解，背景，它是什么，有什么优缺点？
+### 8，HandlerThread面试详解，背景，它是什么，有什么优缺点？
 
 开启Thread子线程进行耗时操作，多次创建和销毁线程是很耗系统资源的，为了解决这个问题，google搞了一个HandlerThread；
 
@@ -589,17 +588,17 @@ handler整个流程中，主要有四个对象，handler，Message,MessageQueue,
 
 与线程池注重并发不同，HandlerThread是一个串行队列，HandlerThread背后只有一个线程。
 
-###9，HandlerThread源码解析
+### 9，HandlerThread源码解析
 
-###10，Handler、 Thread 和 HandlerThread 的差别
+### 10，Handler、 Thread 和 HandlerThread 的差别
 
-#View 的绘制与分发，自定义等
+# View 的绘制与分发，自定义等
 
-###1，view树的绘制流程
+### 1，view树的绘制流程
 
 measure（ 测量大小）-> layout（安置位置）-> draw （绘制）自上而下进行遍历
 
-###2，measure的重要方法
+### 2，measure的重要方法
 
 View的measure过程由ViewGroup传递而来，在调用View.measure方法之前，会首先根据View自身的LayoutParams和父布局的MeasureSpec确定子view的MeasureSpec，然后将view宽高对应的measureSpec传递到measure方法中，那么子view的MeasureSpec获取规则是怎样的？分几种情况进行说明
 
@@ -643,7 +642,7 @@ onMeasure（2个参数，宽和高）
 
 setMeasuredDimension（设置测量的大小，一定会调用，宽和高）
 
-###3，layout方法
+### 3，layout方法
 
 view中的onLayout方法是抽象方法，viewgroup继承view必须实现onLayout方法
 
@@ -655,7 +654,7 @@ public void layout(int l,int t,int r, int b){
   super.layout(l,t,r+100,b+100);
 }
 ```
-###4，draw
+### 4，draw
 
 View的绘制过程遵循如下几步：
 
@@ -678,7 +677,7 @@ ps：view有一个特殊的方法setWillNotDraw，如果一个view不需要绘�
 
 4.最外面的布局如果设置的padding 不能超出
 
-###5，自定义view需要注意的几点
+### 5，自定义view需要注意的几点
 
 1.让view支持wrap_content属性，在onMeasure方法中针对AT_MOST模式做专门处理，否则wrap_content会和match_parent效果一样（继承ViewGroup也同样要在onMeasure中做这个判断处理）
 ```
@@ -702,7 +701,7 @@ if(widthMeasureSpec == MeasureSpec.AT_MOST && heightMeasureSpec == MeasureSpec.A
 view里面耗时的操作layout，减少requestLayout()避免让UI系统重新遍历整棵树
 如果有一个很复杂的布局，不如将这个复杂的布局直接使用自己写的viewgroup来实现，减少了一个树的层次关系，全部都是自己测量和layout，打到优化的目的，facebook经常这么搞
 
-###6，介绍下实现一个自定义view的基本流程
+### 6，介绍下实现一个自定义view的基本流程
 
 1、自定义View的属性 编写attr.xml文件
 2、在layout布局文件中引用，同时引用命名空间
@@ -710,7 +709,7 @@ view里面耗时的操作layout，减少requestLayout()避免让UI系统重新�
 4、重写onMesure
 5、重写onDraw
 
-###7，View的事件分发机制
+### 7，View的事件分发机制
 
 1，为什么有事件分发机制？
 view是树形结构的，view会重叠，点击会无法判断，所以需要事件分发来统一调度
@@ -721,7 +720,7 @@ dispatchTouchEvent
 onInterceptTouchEvent
 onTouchEvent
 
-###3，事件分发流程
+### 3，事件分发流程
 
 Activity->PhoneWindow->DecorView->ViewGroup->View
 
@@ -738,11 +737,11 @@ Activity->PhoneWindow->DecorView->ViewGroup->View
 6、onInterceptTouchEvent为ViewGroup特有，可以拦截事件.
 7、Down事件到来时，如果一个View没有消费该事件，那么后续的MOVE/UP事件都不会再给它
 ```
-###8，View的加载流程
+### 8，View的加载流程
 
 View随着Activity的创建而加载，startActivity启动一个Activity时，在ActivityThread的handleLaunchActivity方法中会执行Activity的onCreate方法，这个时候会调用setContentView加载布局创建出DecorView并将我们的layout加载到DecorView中，当执行到handleResumeActivity时，Activity的onResume方法被调用，然后WindowManager会将DecorView设置给ViewRootImpl,这样，DecorView就被加载到Window中了，此时界面还没有显示出来，还需要经过View的measure，layout和draw方法，才能完成View的工作流程。我们需要知道View的绘制是由ViewRoot来负责的，每一个DecorView都有一个与之关联的ViewRoot,这种关联关系是由WindowManager维护的，将DecorView和ViewRoot关联之后，ViewRootImpl的requestLayout会被调用以完成初步布局，通过scheduleTraversals方法向主线程发送消息请求遍历，最终调用ViewRootImpl的performTraversals方法，这个方法会执行View的measure layout 和draw流程
 
-###9，View的滑动方式
+### 9，View的滑动方式
 
 a.layout(left,top,right,bottom):通过修改View四个方向的属性值来修改View的坐标，从而滑动View
 
@@ -756,7 +755,7 @@ e.scrollTo/scrollBy:注意移动的是view的内容，scrollBy(50,50)你会看�
 
 f.scroller:scroller需要配置computeScroll方法实现view的滑动，scroller本身并不会滑动view，它的作用可以看作一个插值器，它会计算当前时间点view应该滑动到的距离，然后view不断的重绘，不断的调用computeScroll方法，这个方法是个空方法，所以我们重写这个方法，在这个方法中不断的从scroller中获取当前view的位置，调用scrollTo方法实现滑动的效果
 
-###10. Requestlayout， onlayout， onDraw， DrawChild 区别与联系
+### 10. Requestlayout， onlayout， onDraw， DrawChild 区别与联系
 
 RequestLayout()方法：会导致调用Measure()方法和layout()。将会根据标志位判断是否需要onDraw();
 
@@ -766,7 +765,7 @@ onLayout()：摆放viewGroup里面的子控件
 onDraw()：绘制视图本身；（每个View都需要重载该方法，ViewGroup不需要实现该方法）
 drawChild(): 重新回调每一个子视图的draw方法。child.draw(canvas, this, drawingTime);
 
-###11. invalidate()和 postInvalidate() 的区别及使用
+### 11. invalidate()和 postInvalidate() 的区别及使用
 
 View.invalidate():层层上传到父级，直到传递到ViewRootImpl后出发了scheduleTraversals(),然后整个View树开始重新按照View绘制流程进行重绘任务。
 `invalidate()：在UI主线程当中刷新View；`
@@ -797,7 +796,7 @@ public void dispatchInvalidateDelayed(View view, long delayMilliseconds) {  
           }
  }
 ```
-###12，LinearLayout对比RelativeLayout
+### 12，LinearLayout对比RelativeLayout
 
 性能对比：LinearLayout的性能要比RelativeLayout好。
 
@@ -805,11 +804,11 @@ public void dispatchInvalidateDelayed(View view, long delayMilliseconds) {  
 
 为什么RelativeLayout会测量两次？首先RelativeLayout中的子view排列方式是基于彼此依赖的关系，而这个依赖可能和布局中view的顺序无关，在确定每一个子view的位置的时候，就需要先给每一个子view排一下序。又因为RelativeLayout允许横向和纵向相互依赖，所以需要横向纵向分别进行一次排序测量。
 
-###13，RecyclerView在很多方面能取代ListView，Google为什么没把ListView划上一条过时的横线？
+### 13，RecyclerView在很多方面能取代ListView，Google为什么没把ListView划上一条过时的横线？
 
 ListView采用的是RecyclerBin的回收机制在一些轻量级的List显示时效率更高。
 
-###14， RecyclerView 的缓存机制
+### 14， RecyclerView 的缓存机制
 
 四级缓存，主要三个类（Recycler，RecycledViewPool和ViewCacheExtension）
 Recycler：管理已经废弃或者与RecyclerView分离的ViewHolder，里面有2个重要的成员
@@ -827,7 +826,7 @@ RecyclerView的四级缓存包括：
 
 参考：https://blog.csdn.net/yoonerloop/article/details/84727902
 
-###15，SurfaceView，它是什么？他的继承方式是什么？他与View的区别(从源码角度，如加载，绘制等)。
+### 15，SurfaceView，它是什么？他的继承方式是什么？他与View的区别(从源码角度，如加载，绘制等)。
 
 SurfaceView中采用了双缓冲机制，保证了UI界面的流畅性，同时SurfaceView不在主线程中绘制，而是另开辟一个线程去绘制，所以它不妨碍UI线程；
 
@@ -845,15 +844,15 @@ SurfaceView：基于view视图进行拓展的视图类，更适合2D游戏的开
 
 `GLSurfaceView：基于SurfaceView视图再次进行拓展的视图类，专用于3D游戏开发的视图；是SurfaceView的子类，openGL专用。`
 
-#Android的构建
+# Android的构建
 
-###1，android的构建流程
+### 1，android的构建流程
 
 Java的文件编译成class 字节码文件，然后把字节码加依赖的第三方jar文件一起打包成classes.dex 安卓devilk虚拟机可执行的文件
 
 再打包资源文件，再把dex文件和save文件合并成未签名的包，然后签名打包成一个完整的包
 
-###2，jenkins持续集成构建
+### 2，jenkins持续集成构建
 ……待续
 #MVC/MVP/MVVM
 
@@ -861,17 +860,17 @@ Java的文件编译成class 字节码文件，然后把字节码加依赖的第�
 
 #Android 插件化
 
-###1，由来
+### 1，由来
 
 65536/64k 方法超过限制
 
-###2，解决的问题
+### 2，解决的问题
 
 动态加载APK，资源加载，代码加载
 
 #Android热更新
 
-###1，热更新流程
+### 1，热更新流程
 
 1.  线上检查到严重的crash
 2.  拉出bugfix分支并分支上修复问题
@@ -879,13 +878,13 @@ Java的文件编译成class 字节码文件，然后把字节码加依赖的第�
 4.  app通过推送或者主动拉取补丁文件
 5.  将bugfix代码合到主分支上
 
-###2，更新框架介绍：
+### 2，更新框架介绍：
 
 Dexposed
 AndFix
 Nuwa
 
-###3，原理
+### 3，原理
 
 java的加载器：`PathClassLoader，DexClassLoader`
 机制：ClassLoader遍历dexElements这个数组，
@@ -896,9 +895,9 @@ java的加载器：`PathClassLoader，DexClassLoader`
 
 而热修复的解决方法就是将新的dex添加到该集合中，并且是在旧的dex的前面，所以就会优先被取出来并且return返回。
 
-#进程保活
+# 进程保活
 
-###1，Android进程的优先级
+### 1，Android进程的优先级
 
 Foreground Process 前台进程
 Visible process 可见进程
@@ -906,13 +905,13 @@ Service process 服务进程
 Background process 后台进程
 Empty process 空进程
 
-###2，Android进程的回收策略
+### 2，Android进程的回收策略
 
 Low memory killer：通过一些比较复杂的评分机制，对进程进行打分，然后将分数高的判定为bad进程，杀死并释放内存。
 
 OOM _ODJ : 判别进程的优先级。
 
-###3，进程保活方案
+### 3，进程保活方案
 
 利用系统广播
 利用service机制拉活
@@ -926,7 +925,7 @@ c: 双进程Service： 让2个进程互相保护对方，其中一个Service被�
 d: 用C编写守护进程(即子进程) : Android系统中当前进程(Process)fork出来的子进程，被系统认为是两个不同的进程。当父进程被杀死的时候，子进程仍然可以存活，并不受影响(Android5.0以上的版本不可行）联系厂商，加入白名单
 e.锁屏状态下，开启一个一像素Activity
 
-#Git
+# Git
 
 1，工作区
 
@@ -953,4 +952,4 @@ fork操作
 
 EntryPoint的类
 
-#Android其他相关面试题
+# Android其他相关面试题
