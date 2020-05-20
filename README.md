@@ -1,3 +1,10 @@
+- 最近1个月比较密集的去面试，期间遇到很多不同公司，那么对应的技术点要求也不同
+- 最后我从市面上大部分面试题里抽出很多会经常问到的问题汇总成下面几篇
+- 目前还没排好版，这些本来都是我放在笔记里个人用来面试准备的；后来想了想，有些难免有疏漏，所以把这些都放在git上
+- 如果有错误还望看到的朋友予以指正，感谢！
+- 大概本周周末的时候我会把所有的文字全部重新排版完成
+
+
 [Java基础篇](https://github.com/hloong/Android_Interview_Guide/blob/master/java%E5%9F%BA%E7%A1%80%E7%AF%87.md)
 
 [Java高级篇](https://github.com/hloong/Android_Interview_Guide/blob/master/java%E9%AB%98%E7%BA%A7%E7%AF%87.md)
