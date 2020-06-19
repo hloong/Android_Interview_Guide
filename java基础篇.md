@@ -750,3 +750,12 @@ while(m.find()){
 LruCache是个泛型类，主要原理是：把最近使用的对象用强引用存储在LinkedHashMap中，当缓存满时，把最近最少使用的对象从内存中移除，并提供get/put方法完成缓存的获取和添加。LruCache是线程安全的，因为使用了synchronized关键字。
 
 当调用put()方法，将元素加到链表头，如果链表中没有该元素，大小不变，如果没有，需调用trimToSize方法判断是否超过最大缓存量，trimToSize()方法中有一个while(true)死循环，如果缓存大小大于最大的缓存值,会不断删除LinkedHashMap中队尾的元素，即最少访问的，直到缓存大小小于最大缓存值。当调用LruCache的get方法时，LinkedHashMap会调用recordAccess方法将此元素加到链表头部。
+
+### 20，新问题，面试的时候碰到的，Java怎么跳出多重循环？
+
+在java中，使用break可以跳出循环，默认情况下是跳出最里层的循环，假如我们要跳出多层循环怎么办呢，Java替我们已经做好了这一点，就是用 循环标签 ：即是对某个循环定义一个名字，然后在 break 后面加上这个名字，当符合 break 条件时，程序就会跳到规定的循环，当然其实还有另外2种方法，总共是有三种
+第一种，使用带有标号的的break语句
+第二种，外层的循环条件收到内层的代码控制限制
+第三种，使用try/catch强制跳出循环
+参考：https://blog.csdn.net/qq_37107280/article/details/73556419?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase
+
